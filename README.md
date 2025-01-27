@@ -1,6 +1,6 @@
-# MasterKeys
+# Touch Typing Trainer
 
-MasterKeys is a smart typing trainer designed for learning and mastering custom keyboard layouts, developed as part of a personal hobby project. Over the course of three years, this program was iteratively improved to intelligently train one new key at a time using contextually relevant English words and patterns. It enables users to gradually build typing muscle memory while focusing on their unique keyboard layout.
+This is a smart typing trainer designed for learning and mastering custom keyboard layouts, developed as part of a personal hobby project. Over the course of three years, this program was iteratively improved to intelligently train one new key at a time using contextually relevant English words and patterns. It enables users to gradually build typing muscle memory while focusing on their unique keyboard layout.
 
 ---
 
@@ -85,12 +85,6 @@ MasterKeys was developed to complement the keyboard, ensuring a targeted and eff
 - **tkinter**: GUI framework.
 - **matplotlib**: Graph performance tracking.
 - **pynput**: Keyboard input tracking.
-
----
-
-## Author
-Marij Qureshi  
-[LinkedIn](https://www.linkedin.com/in/marijqureshi/) | [Email](mailto:marij.qureshi@outlook.com)
 
 ---
 
