@@ -69,7 +69,7 @@ MasterKeys was developed to complement the keyboard, ensuring a targeted and eff
 ## Screenshots
 
 ### Main Typing Trainer
-![Screenshot](image.png)
+![Screenshot](XX.png)
 
 ---
 
