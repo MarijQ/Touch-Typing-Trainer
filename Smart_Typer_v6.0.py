@@ -32,11 +32,11 @@ kb = Controller()
 class Wordset:
     def __init__(self):
         # Load data from CSV files
-        self.data = self.load_csv('data2_10kcut.csv')
-        self.monogram = self.load_csv_as_dict('monogram.csv')
-        self.bigram = self.load_csv_as_dict('bigram2.csv')
-        self.trigram = self.load_csv_as_dict('trigram2.csv')
-        self.action_record = self.load_csv('action_record.csv')
+        self.data = self.load_csv('Touch-Typing-Trainer-[GH]/data2_10kcut.csv')
+        self.monogram = self.load_csv_as_dict('Touch-Typing-Trainer-[GH]/monogram.csv')
+        self.bigram = self.load_csv_as_dict('Touch-Typing-Trainer-[GH]/bigram2.csv')
+        self.trigram = self.load_csv_as_dict('Touch-Typing-Trainer-[GH]/trigram2.csv')
+        self.action_record = self.load_csv('Touch-Typing-Trainer-[GH]/action_record.csv')
 
         # Initialize word selection parameters
         self.keylist = "a"
@@ -204,13 +204,16 @@ class Wordset:
 
     def select_word_based_on_type(self):
         """Select a word based on the type (Regular, Capital, Number)."""
-        classtype = np.random.choice(self.wordlistM, size=1, p=self.freqlistM)[0]
-        if classtype == "R":
-            return self.choose_regular()
-        elif classtype == "C":
-            return self.choose_capital()
-        else:
-            return self.choose_number()
+        while True:  # Keep selecting until a valid choice is made
+            classtype = np.random.choice(self.wordlistM, size=1, p=self.freqlistM)[0]
+            if classtype == "R":
+                return self.choose_regular()
+            elif classtype == "C":
+                if self.wordlistC:  # Only pick capital words if available
+                    return self.choose_capital()
+            else:
+                return self.choose_number()
+
 
     def modify_word_based_on_type(self, select_word):
         """Modify the selected word based on punctuation or bracket type."""
@@ -247,11 +250,14 @@ class MainWindow(Wordset):
 
     def __init__(self, master):
         super().__init__()
+        self.cleanmonogram = []
+        self.cleanbigram = []
+        self.cleantrigram = []
         self.frame = Frame(master)
         self.create_gui(master)
         self.load_records()
         self.frame.pack()
-        self.set_space(target=600)
+        self.set_space(target=800)
         self.action()
 
     # GUI Creation Functions
@@ -259,32 +265,44 @@ class MainWindow(Wordset):
         """Create and arrange GUI elements."""
         gui_row = 0
         self.lbl_letters = self.create_label("Letters:", gui_row, 0)
-        self.text_letters = self.create_textfield(self.original_letters, gui_row, 1)  # Initialize as a Text widget
+        self.text_letters = self.create_textfield(self.original_letters, gui_row, 1)
+        
+        # New tag configurations for letter list colours
+        self.text_letters.tag_config("green", foreground="green")
+        self.text_letters.tag_config("orange", foreground="orange")
+        self.text_letters.tag_config("red", foreground="red")
+        self.text_letters.tag_config("purple", foreground="purple")
+        
         gui_row += 1
         self.lbl_symbols = self.create_label("Symbols:", gui_row, 0)
         self.ent_symbols = self.create_entry(r""",.'"(;:!?/-0123456789%£$€&^*=_+<>@[{#~\| """, 70, gui_row, 1)
+        
         gui_row += 1
         self.lbl_untouched = self.create_label("Untouched", gui_row, 0)
         self.lbl_untouched2 = self.create_label("", gui_row, 1)
+        
         gui_row += 1
         self.lbl_score = self.create_label("Score (T<400)", gui_row, 0)
         self.lbl_score2 = self.create_label("", gui_row, 1)
+        
         gui_row += 1
         self.lbl_words = self.create_label("Generated words:", gui_row, 0)
         self.txt_words = self.create_textfield("", gui_row, 1)
         self.txt_words.tag_config("correct", background="green")
         self.txt_words.tag_config("error", background="red")
         self.txt_words.tag_config("part", background="orange")
+        
         gui_row += 1
         self.lbl_type = self.create_label("Type here:", gui_row, 0)
         self.ent_type = self.create_entry("", 70, gui_row, 1)
         self.ent_type.config(background="yellow")
         self.lbl_wpm2 = self.create_label("?? WPM", gui_row, 2)
+        
         gui_row += 1
         self.gui_row = gui_row
         gui_row += 1
         self.lbl_placeholder = self.create_label("Copyright Marij Qureshi 2021", gui_row + 1, 1)
-
+        
         # Set bindings
         master.bind('<Return>', self.action)
         master.bind('<Control-r>', self.reset)
@@ -322,7 +340,7 @@ class MainWindow(Wordset):
     # Record Loading and Saving Functions
     def load_records(self):
         """Load records from CSV files."""
-        self.record = self.load_csv('record.csv')
+        self.record = self.load_csv('Touch-Typing-Trainer-[GH]/record.csv')
         self.record = [x for x in self.record if x]
         if len(self.record) < 5:
             self.reset(event=1)
@@ -337,13 +355,14 @@ class MainWindow(Wordset):
         """Clean and save the records to CSV files."""
         self.record = [x for x in self.record if x and x[0] != " "]
         self.record.append([" ", 1, 0, 0, float(self.record[-1][4])])
-        self.save_csv("record.csv", self.record)
-        self.save_csv("monogram.csv", self.monogram.items())
-        self.save_csv("bigram2.csv", self.bigram.items())
-        self.save_csv("trigram2.csv", self.trigram.items())
+        self.save_csv("Touch-Typing-Trainer-[GH]/record.csv", self.record)
+        self.save_csv("Touch-Typing-Trainer-[GH]/monogram.csv", self.monogram.items())
+        self.save_csv("Touch-Typing-Trainer-[GH]/bigram2.csv", self.bigram.items())
+        self.save_csv("Touch-Typing-Trainer-[GH]/trigram2.csv", self.trigram.items())
 
     # Data Processing Functions
-    def set_space(self, target=600):
+
+    def set_space(self, target=800):
         """Adjust the space character in the keylist to achieve the target score."""
         full_letters = self.text_letters.get("1.0", "end-1c")
         space_idx = full_letters.find(" ")
@@ -351,36 +370,70 @@ class MainWindow(Wordset):
         while self.score < target and space_idx < len(full_letters):
             space_idx += 1
             full_letters = self.text_letters.get("1.0", "end-1c")
-            letter_subset = full_letters[:space_idx + 1].replace(" ", "")
-            self.keylist = "".join([c for c in letter_subset if c in "aeiou" or c in letter_subset[-5:]])
+            subset_with_space = full_letters[:space_idx + 1]
+            letter_subset = subset_with_space.replace(" ", "")
+            encountered_letters = set(letter_subset)
+            last_letter = letter_subset[-1] if letter_subset else ""
+            
+            vowels = {c for c in encountered_letters if c in "aeiou"}
+            consonants = {c for c in encountered_letters if c.islower() and c not in "aeiou"}
+            others = encountered_letters - vowels - consonants
 
-            self.text_letters.config(state=tk.NORMAL)  # Enable editing
-            self.text_letters.delete("1.0", tk.END)  # Clear the Text widget
+            worst_vowels = sorted(vowels, key=lambda k: -float(self.monogram.get(k, 0)))[:3]
+            worst_consonants = sorted(consonants, key=lambda k: -float(self.monogram.get(k, 0)))[:3]
+            worst_others = sorted(others, key=lambda k: -float(self.monogram.get(k, 0)))[:3]
+
+            remaining_consonants = list(consonants - set(worst_consonants))
+            helpers = random.sample(remaining_consonants, min(3, len(remaining_consonants)))
+
+            selected_letters = set(worst_vowels) | set(worst_consonants) | set(worst_others) | set(helpers)
+            if last_letter:
+                selected_letters.add(last_letter)
+
+            self.keylist = "".join(sorted(selected_letters))
+            print(self.keylist)
+
             new_letters = letter_subset + " " + full_letters[space_idx + 1:]
-            # Insert and color the text
+
+            self.text_letters.config(state=tk.NORMAL)
+            self.text_letters.delete("1.0", tk.END)
             self.text_letters.tag_remove("green", "1.0", tk.END)
             self.text_letters.tag_remove("purple", "1.0", tk.END)
+            self.text_letters.tag_remove("orange", "1.0", tk.END)
+            self.text_letters.tag_remove("red", "1.0", tk.END)
+
+            # Store groupings for later use (e.g., in plot2)
+            self.last_letter = last_letter
+            self.group_vowel_helper = vowels.union(helpers)
+            self.group_wc = set(worst_consonants)
+            self.group_wo = set(worst_others)
+
             for i, c in enumerate(new_letters):
                 self.text_letters.insert(tk.END, c)
                 if c in self.keylist:
-                    tag = "purple" if c == self.keylist[-1] else "green"
-                    self.text_letters.tag_add(tag, f"1.{i}", f"1.{i + 1}")
+                    if c == self.last_letter:
+                        tag = "purple"
+                    elif c in self.group_wc:
+                        tag = "orange"
+                    elif c in self.group_wo:
+                        tag = "red"
+                    elif c in self.group_vowel_helper:
+                        tag = "green"
+                    else:
+                        tag = "green"
+                    self.text_letters.tag_add(tag, f"1.{i}", f"1.{i+1}")
 
-            # Configure the color tags
-            self.text_letters.tag_config("green", foreground="green")
-            self.text_letters.tag_config("purple", foreground="purple")
-
-            # Disable editing
             self.text_letters.config(state=tk.DISABLED)
             self.process_keylist()
             self.update_data_file()
             self.generate_words()
             self.update_labels()
+            print(self.score)
 
     def process_keylist(self):
         """Read and process settings from the GUI."""
-        self.keylistR = self.keylist[:min(len(self.keylist), 26)]
-        self.keylistC = self.keylist[min(len(self.keylist), 26):min(len(self.keylist), 52)]
+        self.keylistR = ''.join([char for char in self.keylist if char.islower()])
+        self.keylistC = ''.join([char for char in self.keylist if char.isupper()])
         self.keylistC_conv = self.keylistC.lower()
         self.keylistN = ''.join([c for c in self.keylist if c in "0123456789.£$€%"])
         self.keylistP = ''.join([c for c in self.keylist if c in r""",.';:!?/-&^*=_+<>@#~\|"""])
@@ -402,7 +455,7 @@ class MainWindow(Wordset):
             row[4] = self.calculate_bigram_score(row[0])
             row[5] = self.calculate_trigram_score(row[0])
             row[6] = row[2] ** self.w_freq * row[3] ** self.w_monogram * row[4] ** self.w_bigram * row[5] ** self.w_trigram
-        self.save_csv("data2_10kcut.csv", self.data)
+        self.save_csv("Touch-Typing-Trainer-[GH]/data2_10kcut.csv", self.data)
 
     def calculate_bigram_score(self, word):
         """Calculate the bigram score for a word."""
@@ -435,30 +488,50 @@ class MainWindow(Wordset):
         self.cleanmonogram = [[k, int(float(v))] for k, v in self.monogram.items() if any(k in word for word in self.wordlist)]
         self.cleanbigram = [[k, int(float(v))] for k, v in self.bigram.items() if any(k in word for word in self.wordlist)]
         self.cleantrigram = [[k, int(float(v))] for k, v in self.trigram.items() if any(k in word for word in self.wordlist)]
+
         self.oldscore = self.score
         self.scoreR1 = stat.mean([v for k, v in self.cleanmonogram])
         self.scoreR2 = stat.mean([v for k, v in self.cleanbigram])
-        self.scoreR3 = stat.mean([v for k, v in self.cleantrigram])
-        self.scoreR = (self.scoreR1 * self.scoreR2 / 2 * self.scoreR3 / 3) ** (1 / 3)
+        if self.cleantrigram:
+            self.scoreR3 = stat.mean([v for k, v in self.cleantrigram])
+            self.scoreR = (self.scoreR1 * self.scoreR2 / 2 * self.scoreR3 / 3) ** (1 / 3)
+        else:
+            self.scoreR = (self.scoreR1 * self.scoreR2 / 2) ** (1 / 2)
+
         self.scoreC = self.choose_matrix["C"]
         self.scoreN = self.choose_matrix["N"]
         self.scoreP = self.choose_matrix["P"]
         self.scoreB = self.choose_matrix["B"]
-        self.score = self.scoreR
-        rootcount = 1
-        if self.choose_matrix["C"] > 0:
-            self.score *= (self.scoreC - 200)
-            rootcount += 1
-        if self.choose_matrix["N"] > 0:
-            self.score *= (self.scoreN - 200)
-            rootcount += 1
-        if self.choose_matrix["P"] > 0:
-            self.score *= (self.scoreP - 200)
-            rootcount += 1
-        if self.choose_matrix["B"] > 0:
-            self.score *= (self.scoreB - 200)
-            rootcount += 1
-        self.score = int(self.score ** (1 / rootcount))
+        # Count how many letters come from each category
+        num_R = sum(1 for c in self.keylist if c in self.keylistR)
+        num_C = sum(1 for c in self.keylist if c in self.keylistC)
+        num_N = sum(1 for c in self.keylist if c in self.keylistN)
+        num_P = sum(1 for c in self.keylist if c in self.keylistP)
+        num_B = sum(1 for c in self.keylist if c in self.keylistB)
+
+        # Total letters considered
+        total = num_R + num_C + num_N + num_P + num_B
+
+        # Avoid divide-by-zero by ensuring at least one category is present
+        if total == 0:
+            total = 1
+
+        # Compute weight proportions
+        weight_R = num_R / total
+        weight_C = num_C / total
+        weight_N = num_N / total
+        weight_P = num_P / total
+        weight_B = num_B / total
+
+        # Compute final weighted score
+        self.score = int(
+            weight_R * self.scoreR +
+            weight_C * self.scoreC +
+            weight_N * self.scoreN +
+            weight_P * self.scoreP +
+            weight_B * self.scoreB
+        )
+
 
     def update_labels(self):
         """Update labels in the GUI."""
@@ -478,7 +551,7 @@ class MainWindow(Wordset):
                  int(self.scoreP), int(self.scoreB), int(self.score), int(self.scorediff),
                  int(self.scoreR1), int(self.scoreR2 / 2), int(self.scoreR3 / 3)]
             )
-        self.save_csv("action_record.csv", self.action_record)
+        self.save_csv("Touch-Typing-Trainer-[GH]/action_record.csv", self.action_record)
 
     # Plotting Functions
     def plot(self):
@@ -522,16 +595,32 @@ class MainWindow(Wordset):
         """Plot the monogram frequency distribution."""
         fig2 = Figure(figsize=(10, 2), dpi=100)
         self.subplot2 = fig2.add_subplot(111)
+
         M = [int(float(v)) for k, v in self.monogram.items()]
         D = [M[0]]
         for i in range(1, len(M)):
             D.append(M[i])
 
-        self.subplot2.bar(range(len(D)), D, align='center', tick_label=list(self.monogram.keys()))
+        # Determine colours per letter based on groups defined in set_space
+        colors = []
+        for letter in self.monogram.keys():
+            if hasattr(self, "last_letter") and letter == self.last_letter:
+                colors.append("purple")
+            elif hasattr(self, "group_wc") and letter in self.group_wc:
+                colors.append("orange")
+            elif hasattr(self, "group_wo") and letter in self.group_wo:
+                colors.append("red")
+            elif hasattr(self, "group_vowel_helper") and letter in self.group_vowel_helper:
+                colors.append("green")
+            else:
+                colors.append("blue")
+
+        self.subplot2.bar(range(len(D)), D, align='center', tick_label=list(self.monogram.keys()), color=colors)
         self.subplot2.axhline(y=600, color='r', linestyle='--')
         self.subplot2.axhline(y=800, color='orange', linestyle='--')
         self.subplot2.set_ylim([0, 2000])
         self.subplot2.set_xlim([-0.5, len(D) - 0.5])
+
         self.img_plot2 = FigureCanvasTkAgg(fig2, master=self.frame)
         self.img_plot2.get_tk_widget().grid(row=self.gui_row + 1, column=1)
 
@@ -543,7 +632,7 @@ class MainWindow(Wordset):
         self.update_data_file()
         self.generate_words()
         self.update_labels()
-        self.set_space(target=600)  # Run set_space after score calculation
+        self.set_space(target=800)  # Run set_space after score calculation
         self.update_action_record()
         self.plot()
         self.plot2()
@@ -651,11 +740,11 @@ class MainWindow(Wordset):
             row[3] = row[4] = row[5] = 1
         self.txt_words.delete("1.0", tk.END)
         self.txt_words.insert(END, "RESET RECORDS")
-        self.save_csv("action_record.csv", self.action_record)
-        self.save_csv("record.csv", self.record)
-        self.save_csv("monogram.csv", self.monogram.items())
-        self.save_csv("bigram2.csv", self.bigram.items())
-        self.save_csv("trigram2.csv", self.trigram.items())
+        self.save_csv("Touch-Typing-Trainer-[GH]/action_record.csv", self.action_record)
+        self.save_csv("Touch-Typing-Trainer-[GH]/record.csv", self.record)
+        self.save_csv("Touch-Typing-Trainer-[GH]/monogram.csv", self.monogram.items())
+        self.save_csv("Touch-Typing-Trainer-[GH]/bigram2.csv", self.bigram.items())
+        self.save_csv("Touch-Typing-Trainer-[GH]/trigram2.csv", self.trigram.items())
 
 
 # Main Function: Initializes and runs the tkinter main loop.
