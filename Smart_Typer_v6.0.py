@@ -379,9 +379,9 @@ class MainWindow(Wordset):
             consonants = {c for c in encountered_letters if c.islower() and c not in "aeiou"}
             others = encountered_letters - vowels - consonants
 
-            worst_vowels = sorted(vowels, key=lambda k: -float(self.monogram.get(k, 0)))[:3]
-            worst_consonants = sorted(consonants, key=lambda k: -float(self.monogram.get(k, 0)))[:3]
-            worst_others = sorted(others, key=lambda k: -float(self.monogram.get(k, 0)))[:3]
+            worst_vowels = sorted(vowels, key=lambda k: -float(self.monogram.get(k, 0)))[:]
+            worst_consonants = sorted(consonants, key=lambda k: -float(self.monogram.get(k, 0)))[:]
+            worst_others = sorted(others, key=lambda k: -float(self.monogram.get(k, 0)))[:]
 
             remaining_consonants = list(consonants - set(worst_consonants))
             helpers = random.sample(remaining_consonants, min(3, len(remaining_consonants)))
