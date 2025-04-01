@@ -166,9 +166,7 @@ class Wordset:
         self.freqlist = self.normalize_frequencies([int(row[6]) for row in self.activelist])
 
         self.wordlistC = [row[0] for row in self.activelistC]
-        self.freqlistC = self.normalize_frequencies(
-            [int(0.5 * float(row[6]) + 0.5 * float(self.monogram[row[0][0].capitalize()])) for row in self.activelistC]
-        )
+        self.freqlistC = self.normalize_frequencies([int((0.5 * float(row[6]) + 0.5 * float(self.monogram[row[0][0].capitalize()]))) for row in self.activelistC])
 
         self.wordlistN = [k for k, v in self.N_monograms]
         self.freqlistN = self.normalize_frequencies([int(float(v)) for k, v in self.N_monograms])
@@ -239,7 +237,7 @@ class MainWindow(Wordset):
     current_pos = 0
     width = 70
     w_freq = 1
-    w_monogram = 1
+    w_monogram = 5
     w_bigram = 1
     w_trigram = 1
     score = 0
@@ -301,7 +299,7 @@ class MainWindow(Wordset):
         gui_row += 1
         self.gui_row = gui_row
         gui_row += 1
-        self.lbl_placeholder = self.create_label("Copyright Marij Qureshi 2021", gui_row + 1, 1)
+        self.lbl_placeholder = self.create_label("created by Marij Qureshi", gui_row + 1, 1)
         
         # Set bindings
         master.bind('<Return>', self.action)
@@ -373,55 +371,19 @@ class MainWindow(Wordset):
             subset_with_space = full_letters[:space_idx + 1]
             letter_subset = subset_with_space.replace(" ", "")
             encountered_letters = set(letter_subset)
-            last_letter = letter_subset[-1] if letter_subset else ""
-            
-            vowels = {c for c in encountered_letters if c in "aeiou"}
-            consonants = {c for c in encountered_letters if c.islower() and c not in "aeiou"}
-            others = encountered_letters - vowels - consonants
 
-            worst_vowels = sorted(vowels, key=lambda k: -float(self.monogram.get(k, 0)))[:]
-            worst_consonants = sorted(consonants, key=lambda k: -float(self.monogram.get(k, 0)))[:]
-            worst_others = sorted(others, key=lambda k: -float(self.monogram.get(k, 0)))[:]
-
-            remaining_consonants = list(consonants - set(worst_consonants))
-            helpers = random.sample(remaining_consonants, min(3, len(remaining_consonants)))
-
-            selected_letters = set(worst_vowels) | set(worst_consonants) | set(worst_others) | set(helpers)
-            if last_letter:
-                selected_letters.add(last_letter)
-
-            self.keylist = "".join(sorted(selected_letters))
-            print(self.keylist)
+            self.keylist = "".join(sorted(encountered_letters))
 
             new_letters = letter_subset + " " + full_letters[space_idx + 1:]
 
             self.text_letters.config(state=tk.NORMAL)
             self.text_letters.delete("1.0", tk.END)
             self.text_letters.tag_remove("green", "1.0", tk.END)
-            self.text_letters.tag_remove("purple", "1.0", tk.END)
-            self.text_letters.tag_remove("orange", "1.0", tk.END)
-            self.text_letters.tag_remove("red", "1.0", tk.END)
-
-            # Store groupings for later use (e.g., in plot2)
-            self.last_letter = last_letter
-            self.group_vowel_helper = vowels.union(helpers)
-            self.group_wc = set(worst_consonants)
-            self.group_wo = set(worst_others)
 
             for i, c in enumerate(new_letters):
                 self.text_letters.insert(tk.END, c)
                 if c in self.keylist:
-                    if c == self.last_letter:
-                        tag = "purple"
-                    elif c in self.group_wc:
-                        tag = "orange"
-                    elif c in self.group_wo:
-                        tag = "red"
-                    elif c in self.group_vowel_helper:
-                        tag = "green"
-                    else:
-                        tag = "green"
-                    self.text_letters.tag_add(tag, f"1.{i}", f"1.{i+1}")
+                    self.text_letters.tag_add("green", f"1.{i}", f"1.{i+1}")
 
             self.text_letters.config(state=tk.DISABLED)
             self.process_keylist()
@@ -531,7 +493,6 @@ class MainWindow(Wordset):
             weight_P * self.scoreP +
             weight_B * self.scoreB
         )
-
 
     def update_labels(self):
         """Update labels in the GUI."""
